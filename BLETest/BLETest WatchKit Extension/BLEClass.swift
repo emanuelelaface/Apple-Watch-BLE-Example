@@ -10,6 +10,10 @@ import CoreBluetooth
 
 class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeripheralDelegate {
 
+    let sensorName = "ArduinoSensor"
+    let serviceName = "1101"
+    let characteristicName = "2101"
+  
     var myCentral: CBCentralManager!
 
     @Published var isSwitchedOn = false
@@ -43,7 +47,7 @@ class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeriph
             peripheralName = "Unknown"
         }
 
-        if peripheralName == "ArduinoSensor" {
+        if peripheralName == sensorName {
             self.stopScanning()
             self.myCentral.connect(peripheral, options: nil)
             self.peripheral = peripheral
@@ -62,7 +66,7 @@ class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeriph
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         if let services = peripheral.services {
             for service in services {
-                if service.uuid == CBUUID(string: "1101") {
+                if service.uuid == CBUUID(string: serviceName) {
                     peripheral.discoverCharacteristics(nil, for: service)
                 }
             }
@@ -72,7 +76,7 @@ class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeriph
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         if let charac = service.characteristics {
             for characteristic in charac {
-                if characteristic.uuid == CBUUID(string: "2101") {
+                if characteristic.uuid == CBUUID(string: characteristicName) {
                     self.peripheral.readValue(for: characteristic)
                     if let data = characteristic.value {
                         self.sensorValue = data[0]
@@ -84,7 +88,7 @@ class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeriph
     }
     
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        if characteristic.uuid == CBUUID(string: "2101") {
+        if characteristic.uuid == CBUUID(string: characteristicName) {
             self.peripheral.readValue(for: characteristic)
             if let data = characteristic.value {
                 self.sensorValue = data[0]
