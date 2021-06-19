@@ -3,6 +3,7 @@
 #define DEVICENAME "ArduinoSensor"
 #define SERVICE "1101"
 #define CHARACTERISTIC "2101"
+#define SENSOR A0
 
 BLEService sensorService(SERVICE);
 BLEUnsignedCharCharacteristic serviceCharacteristic(CHARACTERISTIC, BLERead | BLENotify);
@@ -31,7 +32,7 @@ void loop()
     digitalWrite(LED_BUILTIN, HIGH);
 
     while (central.connected()) {
-      int sensor = analogRead(A0);
+      int sensor = analogRead(SENSOR);
       int sensorValue = map(sensor, 0, 1023, 0, 100);
       serviceCharacteristic.writeValue(sensorValue);
       delay(200);
